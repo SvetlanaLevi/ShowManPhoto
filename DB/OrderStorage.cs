@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DB
 {
 
-    class OrderStorage
+    public class OrderStorage
     {
         private IDbConnection _connection;
         private IDbTransaction _transaction;
@@ -49,25 +49,7 @@ namespace DB
             return result.FirstOrDefault();
         }
 
-        public async ValueTask SelectedPhotoAdd(List<SelectedPhoto> dataModels)
-        {
-            foreach (var model in dataModels)
-            {
-                var result = await _connection.QueryAsync(
-                   "SelectedPhoto_Insert",
-                   param: new
-                   {
-                       model.OrderId,
-                       model.Photo.Id,
-                       model.IsForPrint,
-                       model.PrintFormatId,
-                       model.Comment
-                   },
-                   transaction: _transaction,
-                   commandType: CommandType.StoredProcedure
-                   );
-            }
-        }
+
 
         public async ValueTask<List<SelectedPhoto>> SelectedPhotoGetByOrderId(int orderId)
         {

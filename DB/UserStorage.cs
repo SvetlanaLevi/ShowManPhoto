@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DB
 {
-    class UserStorage
+    public class UserStorage
     {
 
     }

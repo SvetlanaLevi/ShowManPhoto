@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DB
 {
-    class PhotoStorage
+    public class PhotoStorage
     {
         private IDbConnection _connection;
         private IDbTransaction _transaction;
@@ -71,8 +71,9 @@ namespace DB
 
         }
 
-        public async ValueTask PhotoAdd(List<Photo> dataModels)
+        public async ValueTask<List<int>> PhotoAdd(List<Photo> dataModels)
         {
+            var resultList = new List<int>();
             foreach (var model in dataModels)
             {
                 var result = await _connection.QueryAsync(
@@ -86,7 +87,32 @@ namespace DB
                    transaction: _transaction,
                    commandType: CommandType.StoredProcedure
                    );
+                resultList.Add(result.FirstOrDefault());
             }
+            return resultList;
+        }
+
+        public async ValueTask<List<int>> SelectedPhotoAdd(List<SelectedPhoto> dataModels)
+        {
+            var resultList = new List<int>();
+            foreach (var model in dataModels)
+            {
+                var result = await _connection.QueryAsync<int>(
+                   "SelectedPhoto_Insert",
+                   param: new
+                   {
+                       model.OrderId,
+                       PhotoId = model.Photo.Id,
+                       model.IsForPrint,
+                       model.PrintFormatId,
+                       model.Comment
+                   },
+                   transaction: _transaction,
+                   commandType: CommandType.StoredProcedure
+                   );
+                resultList.Add(result.FirstOrDefault());
+            }
+            return resultList;
         }
         public void TransactionStart()
         {
