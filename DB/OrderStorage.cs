@@ -25,7 +25,6 @@ namespace DB
                "Order_Insert",
                param: new
                {
-                   dataModel.AlbumId,
                    dataModel.UserId,
                    dataModel.StatusId
                },
@@ -51,10 +50,10 @@ namespace DB
 
 
 
-        public async ValueTask<List<SelectedPhoto>> SelectedPhotoGetByOrderId(int orderId)
+        public async ValueTask<List<OrderedPhoto>> SelectedPhotoGetByOrderId(int orderId)
         {
 
-            var result = await _connection.QueryAsync<SelectedPhoto>(
+            var result = await _connection.QueryAsync<OrderedPhoto>(
                "SelectdedPhoto_SelectByOrderId",
                param: new { orderId },
                transaction: _transaction,
@@ -72,6 +71,46 @@ namespace DB
                transaction: _transaction,
                commandType: CommandType.StoredProcedure
                );
+        }
+        public async ValueTask<List<int>> OrderedPhotosAdd(List<OrderedPhoto> dataModels)
+        {
+            var resultList = new List<int>();
+            foreach (var model in dataModels)
+            {
+                var result = await _connection.QueryAsync<int>(
+                   "SelectedPhoto_Insert",
+                   param: new
+                   {
+                       model.OrderId,
+                       model.PhotoId,
+                       model.IsForPrint,
+                       model.PrintFormatId,
+                       model.Comment
+                   },
+                   transaction: _transaction,
+                   commandType: CommandType.StoredProcedure
+                   );
+                resultList.Add(result.FirstOrDefault());
+            }
+            return resultList;
+        }
+
+        public async ValueTask<OrderedPhoto> OrderedPhotoAdd(OrderedPhoto model)
+        {
+                var result = await _connection.QueryAsync<OrderedPhoto>(
+                   "SelectedPhoto_Insert",
+                   param: new
+                   {
+                       model.OrderId,
+                       model.PhotoId,
+                       model.IsForPrint,
+                       model.PrintFormatId,
+                       model.Comment
+                   },
+                   transaction: _transaction,
+                   commandType: CommandType.StoredProcedure
+                   );
+            return result.FirstOrDefault();
         }
 
         public void TransactionStart()

@@ -8,8 +8,8 @@ namespace DB
         public int? Id { get; set; }
         public int UserId { get; set; }
         public int StatusId { get; set; }
-        public int AlbumId { get; set; }
-        public DateTime OrderDate { get; set; }
-        public List<SelectedPhoto> SelectedPhotos { get; set; }
+        //public int AlbumId { get; set; }
+        public DateTime? OrderDate { get; set; }
+        public List<OrderedPhoto> OrderedPhotos { get; set; }
     }
 }

@@ -20,8 +20,8 @@ namespace DB
         public async ValueTask<Album> AlbumGetById(int Id)
         {
 
-            var result = await _connection.QueryAsync(
-               "Album_SelectById",
+            var result = await _connection.QueryAsync<Album>(
+               "Album_GetById",
                param: new { Id },
                transaction: _transaction,
                commandType: CommandType.StoredProcedure
@@ -34,7 +34,7 @@ namespace DB
         {
 
             var result = await _connection.QueryAsync<Album>(
-               "Album_SelectByUserId",
+               "Album_GetByUserId",
                param: new { userId },
                transaction: _transaction,
                commandType: CommandType.StoredProcedure
@@ -45,7 +45,7 @@ namespace DB
 
         public async ValueTask<Album> AlbumAdd(Album dataModel)
         {
-            var result = await _connection.QueryAsync(
+            var result = await _connection.QueryAsync<int>(
                "Album_Insert",
                param: new
                {
@@ -55,14 +55,14 @@ namespace DB
                transaction: _transaction,
                commandType: CommandType.StoredProcedure
                );
-            return result.FirstOrDefault();
+            return await AlbumGetById(result.FirstOrDefault());
         }
 
         public async ValueTask<List<Photo>> PhotoGetByAlbumId(int Id)
         {
 
             var result = await _connection.QueryAsync<Photo>(
-               "Photo_SelectByAlbumId",
+               "Photo_GetByAlbumId",
                param: new { Id },
                transaction: _transaction,
                commandType: CommandType.StoredProcedure
@@ -76,7 +76,7 @@ namespace DB
             var resultList = new List<int>();
             foreach (var model in dataModels)
             {
-                var result = await _connection.QueryAsync(
+                var result = await _connection.QueryAsync<int>(
                    "Photo_Insert",
                    param: new
                    {
@@ -92,27 +92,33 @@ namespace DB
             return resultList;
         }
 
-        public async ValueTask<List<int>> SelectedPhotoAdd(List<SelectedPhoto> dataModels)
+        public async ValueTask<Photo> PhotoAdd(Photo model)
         {
-            var resultList = new List<int>();
-            foreach (var model in dataModels)
-            {
                 var result = await _connection.QueryAsync<int>(
-                   "SelectedPhoto_Insert",
+                   "Photo_Insert",
                    param: new
                    {
-                       model.OrderId,
-                       PhotoId = model.Photo.Id,
-                       model.IsForPrint,
-                       model.PrintFormatId,
-                       model.Comment
+                       model.AlbumId,
+                       model.FilePath,
+                       model.FileName
                    },
                    transaction: _transaction,
                    commandType: CommandType.StoredProcedure
                    );
-                resultList.Add(result.FirstOrDefault());
-            }
-            return resultList;
+            return await PhotoGetById(result.FirstOrDefault());
+        }
+
+        public async ValueTask<Photo> PhotoGetById(int Id)
+        {
+
+            var result = await _connection.QueryAsync<Photo>(
+               "Photo_GetById",
+               param: new { Id },
+               transaction: _transaction,
+               commandType: CommandType.StoredProcedure
+               );
+            return result.FirstOrDefault();
+
         }
         public void TransactionStart()
         {
